@@ -15,6 +15,8 @@ public class Cafe24Config {
 
 	String client_id;
 	String client_secret;
-	String redirect_uri;
+	String code_redirect_uri;
+	String access_redirect_uri;
 	String scope;
+	String version;
 }

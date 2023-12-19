@@ -10,26 +10,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class CodeChallengeGenerator {
 	
-	public String generate() throws NoSuchAlgorithmException {
-        // Generate a random codeVerifier
-        String codeVerifier = generateRandomCodeVerifier();
+    private static final int MIN_LENGTH = 43;
+    private static final int MAX_LENGTH = 128;
+    private static final SecureRandom secureRandom = new SecureRandom();
 
-        // Convert to ASCII bytes
-        byte[] asciiBytes = codeVerifier.getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+    public String generateCodeVerifier() {
+        String codeVerifier;
+        do {
+            byte[] randomBytes = new byte[32]; // Generate new random bytes each time
+            secureRandom.nextBytes(randomBytes);
+            codeVerifier = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+        } while (codeVerifier.length() < MIN_LENGTH || codeVerifier.length() > MAX_LENGTH);
 
-        // Compute SHA-256 hash
+        return codeVerifier;
+    }
+
+    public static String generateCodeChallenge(String codeVerifier) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(asciiBytes);
-
-        // Base64 URL Encode
+        byte[] hash = digest.digest(codeVerifier.getBytes(java.nio.charset.StandardCharsets.US_ASCII));
         return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
     }
-
-    private String generateRandomCodeVerifier() {
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[32]; // 32 bytes for 256-bit randomness
-        random.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-    }
-
 }
